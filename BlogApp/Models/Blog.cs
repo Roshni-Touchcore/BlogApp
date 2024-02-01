@@ -12,9 +12,8 @@ namespace BlogApp.Models
 
 
 		
-		[Required]
 		//[ForeignKey("User")]
-		public User CreatedBy { get; set; }
+		public User? CreatedBy { get; set; }
 
 		[Required(ErrorMessage = "Blog Title is required")]
 		public string Title { get; set; }

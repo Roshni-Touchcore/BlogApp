@@ -57,7 +57,7 @@ namespace BlogApp.Controllers
 			   user);
 		}
 
-		[HttpPut("[action]/{id}")]
+		/* [HttpPut("[action]/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(User_ValidateUserIdFilterAttribute))]
 		[TypeFilter(typeof(User_ValidateCreateUserFilterAttribute))]
@@ -80,7 +80,7 @@ namespace BlogApp.Controllers
 			db.SaveChanges();
 
 			return NoContent();
-		}
+		} */
 
 
 		[HttpDelete("[action]/{id}")]

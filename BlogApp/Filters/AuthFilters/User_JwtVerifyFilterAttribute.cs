@@ -1,4 +1,6 @@
-﻿using BlogApp.Authentication;
+﻿using System.Security.Claims;
+using BlogApp.Authentication;
+using BlogApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -25,6 +27,16 @@ namespace BlogApp.Filters.AuthFilters
 			{
 				context.Result = new UnauthorizedResult();
 			}
+			else
+			{
+				var userIdClaim = claim.FirstOrDefault(c => c.Type == "UserId");
+				if (userIdClaim != null)
+				{
+					context.HttpContext.Items["UserId"] = userIdClaim.Value as string;
+				}
+			}
+
+
 		}
 	}
 }
