@@ -21,10 +21,8 @@ namespace BlogApp.Models
 		[EmailAddress(ErrorMessage = "Invalid email address")]
 		public string	Email { get; set; }
 
-		[Required(ErrorMessage = "Password is required")]
-		[MinLength(6, ErrorMessage = "Password must be at least 6 characters long")]
 		[DataType(DataType.Password)]
-		public string Password { get; set; }
+		public string? Password { get; set; }
 
 		[Required(ErrorMessage = "Full Name is required")]
 		[StringLength(50, ErrorMessage = "Name cannot be longer than 50 characters.")]

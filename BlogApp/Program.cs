@@ -1,6 +1,9 @@
 using System.Text.Json.Serialization;
 using BlogApp.Data;
+using BlogApp.Repository.Abstract;
+using BlogApp.Repository.Implementation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,10 +14,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
 	options.UseSqlServer(builder.Configuration.GetConnectionString("BlogApp"));
 });
-/*builder.Services.AddControllers().AddJsonOptions(options =>
-{
-	options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-});*/
+
+builder.Services.AddTransient<IFileService, FileService>();
 
 builder.Services.AddControllers().AddJsonOptions(x =>
 				x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
@@ -24,7 +25,12 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
-
+app.UseStaticFiles(new StaticFileOptions
+{
+	FileProvider = new PhysicalFileProvider(
+		   Path.Combine(builder.Environment.ContentRootPath, "Uploads")),
+	RequestPath = "/Resources"
+});
 app.UseAuthorization();
 
 app.MapControllers();

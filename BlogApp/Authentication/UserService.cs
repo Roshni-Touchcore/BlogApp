@@ -19,7 +19,7 @@ namespace BlogApp.Authentication
 		{
 			if (!Guid.TryParse(struserId, out Guid userId))
 			{
-				// Handle invalid GUID format
+				
 				throw new UnauthorizedAccessException("Unauthorized. Please provide a valid userId.");
 			}
 

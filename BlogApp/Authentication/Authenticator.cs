@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using BlogApp.Models;
@@ -83,5 +84,6 @@ namespace BlogApp.Authentication
 			}
 
 		}
+
 	}
 }

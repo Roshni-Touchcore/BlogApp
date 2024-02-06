@@ -23,7 +23,11 @@ namespace BlogApp.Models
 		[Required(ErrorMessage = "Blog Content is required")]
 		public string Content { get; set; }
 
+		[NotMapped]
+		public IFormFile? CoverPhotoFile { get; set; }
+
 		public string? CoverPhoto { get; set; }
+		
 
 
 
@@ -40,4 +44,17 @@ namespace BlogApp.Models
 
 
 	}
+
+
+
+	/*public class BlogCoverPhoto
+	{
+		[Key]
+		public int BlogCoverPhotoId { get; set; }
+		public string UserId { get; set; }
+		public string BlogId { get; set; }
+		public string ImageName { get; set; }
+		public string ImagePath { get; set; }
+	}*/
+
 }

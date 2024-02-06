@@ -11,6 +11,7 @@ namespace BlogApp.Data
 		}
 		public DbSet<User> Users { get; set; }
 		public DbSet<Blog> Blogs {  get; set; }
+		//public DbSet<BlogCoverPhoto> BlogCoverPhotos { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

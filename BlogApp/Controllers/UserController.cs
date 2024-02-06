@@ -1,4 +1,6 @@
-﻿using BlogApp.Data;
+﻿using System.ComponentModel.DataAnnotations;
+using BlogApp.Authentication;
+using BlogApp.Data;
 using BlogApp.Filters.ActionFilters;
 using BlogApp.Filters.AuthFilters;
 using BlogApp.Models;
@@ -43,6 +45,21 @@ namespace BlogApp.Controllers
 		public IActionResult CreateUser([FromBody] User user)
 		{
 
+
+			if (string.IsNullOrEmpty(user.Password))
+			{
+				return BadRequest("Password is required");
+
+
+			}
+			else if (user.Password.Length < 6)
+			{
+				return BadRequest("Password must be at least 6 characters long");
+			}
+
+
+
+
 			user.UserId=user.CreatedBy=user.ModifiedBy=Guid.NewGuid();
 			user.CreatedAt = user.ModifiedAt = DateTime.Now;
 			user.IsActive=true;
@@ -57,7 +74,7 @@ namespace BlogApp.Controllers
 			   user);
 		}
 
-		/* [HttpPut("[action]/{id}")]
+	    [HttpPut("[action]/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(User_ValidateUserIdFilterAttribute))]
 		[TypeFilter(typeof(User_ValidateCreateUserFilterAttribute))]
@@ -65,7 +82,12 @@ namespace BlogApp.Controllers
 		{
 			var userToUpdate = HttpContext.Items["user"] as User;
 			userToUpdate.Email = user.Email;
-			userToUpdate.FullName = user.UserName;
+			userToUpdate.FullName = user.FullName;
+			userToUpdate.UserName = user.UserName;
+
+			userToUpdate.ModifiedAt= DateTime.Now;
+
+
 
 			if (user.Bio != null)
 			{
@@ -80,7 +102,7 @@ namespace BlogApp.Controllers
 			db.SaveChanges();
 
 			return NoContent();
-		} */
+		}
 
 
 		[HttpDelete("[action]/{id}")]

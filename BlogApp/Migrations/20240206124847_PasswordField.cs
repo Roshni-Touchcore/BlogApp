@@ -5,36 +5,32 @@
 namespace BlogApp.Migrations
 {
     /// <inheritdoc />
-    public partial class fullnamerequired : Migration
+    public partial class PasswordField : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "FullName",
+                name: "Password",
                 table: "Users",
-                type: "nvarchar(50)",
-                maxLength: 50,
-                nullable: false,
-                defaultValue: "",
+                type: "nvarchar(max)",
+                nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(50)",
-                oldMaxLength: 50,
-                oldNullable: true);
+                oldType: "nvarchar(max)");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "FullName",
+                name: "Password",
                 table: "Users",
-                type: "nvarchar(50)",
-                maxLength: 50,
-                nullable: true,
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(50)",
-                oldMaxLength: 50);
+                oldType: "nvarchar(max)",
+                oldNullable: true);
         }
     }
 }
