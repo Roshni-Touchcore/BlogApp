@@ -13,7 +13,7 @@ namespace BlogApp.Data
 		public DbSet<Blog> Blogs {  get; set; }
 		public DbSet<BlogLike> BlogLikes { get; set; }
 		public DbSet<BlogComment> BlogComments { get; set; }
-
+		public DbSet<BlogCommentLike> BlogCommentLikes { get; set; }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
