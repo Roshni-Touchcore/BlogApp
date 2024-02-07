@@ -1,15 +1,16 @@
 ﻿using System.Security.Claims;
-using BlogApp.Authentication;
 using BlogApp.Data;
+using BlogApp.Filters;
 using BlogApp.Filters.ActionFilters;
 using BlogApp.Filters.AuthFilters;
-using BlogApp.Models;
+using BlogApp.Models.Domain;
 using BlogApp.Repository.Abstract;
+using BlogApp.Repository.Implementation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.Controllers
 {
-	[ApiController]
+    [ApiController]
 	[Route("[controller]")]
 
 
@@ -34,6 +35,9 @@ namespace BlogApp.Controllers
 		[User_JwtVerifyFilter]
 		public IActionResult GetAllBlogs()
 		{
+
+			
+			
 			return Ok(db.Blogs.ToList());
 		}
 
@@ -55,22 +59,8 @@ namespace BlogApp.Controllers
 		[User_JwtVerifyFilter]
 		public IActionResult CreateBlog([FromForm] Blog blog)
 		{
+			   
 
-			try
-			{
-				var token = HttpContext.Items["UserId"];
-
-				if (token == null)
-				{
-					return Unauthorized();
-				}
-
-				User user = userFromToken.GetUserById(token as string);
-
-				if(user==null)
-				{
-					return Unauthorized();
-				}
 
 				if (blog.CoverPhotoFile == null || blog.CoverPhotoFile.Length == 0)
 				{
@@ -83,24 +73,22 @@ namespace BlogApp.Controllers
 				{
 					blog.CoverPhoto = fileResult.Item2; 
 				}
-				
-				this.db.Blogs.Add(blog);
-				this.db.SaveChanges();
+
+			    User user = userFromToken.GetUserById(HttpContext.Items["UserId"] as string);
+				blog.CreatedBy = user;
+			    blog.ModifiedBy = user.UserId;
+				blog.IsActive = true;
+				blog.CreatedAt = blog.ModifiedAt = DateTime.Now;
+
+				db.Blogs.Add(blog);
+				db.SaveChanges();
 				return CreatedAtAction(nameof(GetBlog),
-			   new { id = blog.BlogId },
-			   blog);
-
-			}
-			catch 
-			{
-				return Unauthorized();
-			}
-			
-			}
+						new { id = blog.BlogId },
+										blog);
+		}
 
 
 
-		[HttpPut]
 		[HttpPut("update/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(Blog_ValidateBlogIdFilterAttribute))]

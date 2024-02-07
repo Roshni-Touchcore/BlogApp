@@ -1,7 +1,8 @@
 ﻿using System.Text;
-using BlogApp.Authentication;
 using BlogApp.Data;
 using BlogApp.Models;
+using BlogApp.Models.DTO;
+using BlogApp.Repository.Implementation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
@@ -9,7 +10,7 @@ using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 namespace BlogApp.Controllers
 {
 
-	[ApiController]
+    [ApiController]
 	public class AuthContoller:ControllerBase
 	{
 		private readonly ApplicationDbContext db;

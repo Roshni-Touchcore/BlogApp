@@ -1,12 +1,12 @@
 ﻿using BlogApp.Data;
-using BlogApp.Models;
+using BlogApp.Models.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace BlogApp.Filters.ActionFilters
 {
-	public class User_ValidateCreateUserFilterAttribute : ActionFilterAttribute
+    public class User_ValidateCreateUserFilterAttribute : ActionFilterAttribute
 	{
 		private readonly ApplicationDbContext db;
         public User_ValidateCreateUserFilterAttribute(ApplicationDbContext db)

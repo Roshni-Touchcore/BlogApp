@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-	options.UseSqlServer(builder.Configuration.GetConnectionString("BlogApp"));
+	options.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("BlogApp"));
 });
 
 builder.Services.AddTransient<IFileService, FileService>();

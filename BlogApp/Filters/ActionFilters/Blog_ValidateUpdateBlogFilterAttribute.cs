@@ -1,10 +1,10 @@
-﻿using BlogApp.Models;
+﻿using BlogApp.Models.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace BlogApp.Filters.ActionFilters
 {
-	public class Blog_ValidateUpdateBlogFilterAttribute : ActionFilterAttribute
+    public class Blog_ValidateUpdateBlogFilterAttribute : ActionFilterAttribute
 	{
 
 		public override void OnActionExecuting(ActionExecutingContext context)

@@ -1,0 +1,30 @@
+﻿using BlogApp.Data;
+using BlogApp.Models.Domain;
+
+namespace BlogApp.Repository.Implementation
+{
+    public class UserService
+    {
+
+
+        private readonly ApplicationDbContext _db;
+
+        public UserService(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+
+        public User GetUserById(string struserId)
+
+        {
+            if (!Guid.TryParse(struserId, out Guid userId))
+            {
+
+                throw new UnauthorizedAccessException("Unauthorized. Please provide a valid userId.");
+            }
+
+            return _db.Users.FirstOrDefault(u => u.UserId == userId);
+        }
+    }
+}
+
