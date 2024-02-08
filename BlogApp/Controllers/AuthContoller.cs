@@ -29,12 +29,12 @@ namespace BlogApp.Controllers
 
 
 		[HttpPost]
-		[Route("/login")]
+		[Route("user/login")]
 		public IActionResult LoginUser([FromBody] UserCredential user)
 		{
 
 			var existingUser = this.db.Users.FirstOrDefault(u => u.UserName == user.Username);
-			if (user == null)
+			if (existingUser == null)
 			{
 
 				ModelState.AddModelError("Unauthorized", "User not Found or Invalid Credentials");
@@ -59,7 +59,7 @@ namespace BlogApp.Controllers
 
 			if (existingUser != null)
 			{
-				var expiresAt = DateTime.UtcNow.AddMinutes(90);
+				var expiresAt = DateTime.UtcNow.AddMinutes(180);
 				
 				return Ok(new
 				{

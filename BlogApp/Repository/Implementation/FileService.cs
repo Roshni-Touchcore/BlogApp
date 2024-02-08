@@ -33,6 +33,7 @@ namespace BlogApp.Repository.Implementation
 			try
 			{
 				var contentPath = this.environment.ContentRootPath;
+
 				// path = "c://projects/productminiapi/uploads" ,not exactly something like that
 				var path = Path.Combine(contentPath, "Uploads");
 				if (!Directory.Exists(path))

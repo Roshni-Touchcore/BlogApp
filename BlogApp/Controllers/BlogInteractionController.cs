@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.Controllers
 {
+	[Route("blog")]
 	[ApiController]
+
 	public class BlogInteractionController : ControllerBase
 	{
 		private readonly ApplicationDbContext db;
@@ -20,7 +22,7 @@ namespace BlogApp.Controllers
 		}
 
 
-		[HttpPost("blog/like/{id}")]
+		[HttpPost("like/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(Blog_ValidateBlogIdFilterAttribute))]
 		public IActionResult LikeOrUnlike(string id)
@@ -57,7 +59,7 @@ namespace BlogApp.Controllers
 	
 
 	
-		[HttpPost("blog/comment/{id}")]
+		[HttpPost("comment/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(Blog_ValidateBlogIdFilterAttribute))]
 		public IActionResult AddBlogComment(string id,[FromBody]BlogComment comment)
@@ -83,7 +85,7 @@ namespace BlogApp.Controllers
 		}
 
 
-		[HttpPut("blog/comment/update/{id}")]
+		[HttpPut("comment/update/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(BlogComment_ValidateBlogCommentIdFilterAttribute))]
 		[TypeFilter(typeof(BlogComment_ValidateUpdateBlogCommentFilterAttribute))]
@@ -109,7 +111,7 @@ namespace BlogApp.Controllers
 
 
 
-		[HttpDelete("blog/comment/delete/{id}")]
+		[HttpDelete("comment/delete/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(BlogComment_ValidateBlogCommentIdFilterAttribute))]
 		public IActionResult DeleteBlogComment(string id)
@@ -126,7 +128,7 @@ namespace BlogApp.Controllers
 
 
 
-		[HttpPost("blog/comment/like/{id}")]
+		[HttpPost("comment/like/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(BlogComment_ValidateBlogCommentIdFilterAttribute))]
 		public IActionResult BlogCommentLikeOrUnlike(string id)

@@ -4,6 +4,7 @@ using BlogApp.Data;
 using BlogApp.Filters.ActionFilters;
 using BlogApp.Filters.AuthFilters;
 using BlogApp.Models.Domain;
+using BlogApp.Repository.Implementation;
 using BlogApp.Repository.Services;
 using Castle.Core.Resource;
 using Microsoft.AspNetCore.Authorization;
@@ -17,10 +18,12 @@ namespace BlogApp.Controllers
 	{
 		private readonly ApplicationDbContext db;
 		private readonly string _pepper;
+		private readonly UserService userFromToken;
 		private readonly int _iteration = 3;
 		public UserController(ApplicationDbContext db)
         {
             this.db=db;
+			this.userFromToken = new UserService(db);
 			_pepper = Environment.GetEnvironmentVariable("PasswordHashExamplePepper");
 
 		}
@@ -35,13 +38,21 @@ namespace BlogApp.Controllers
 
 
 
-		[HttpGet("/{id}")]
+		[HttpGet("{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(User_ValidateUserIdFilterAttribute))]
 		public IActionResult GetUserById(string id)
 		{
 
 			return Ok(HttpContext.Items["user"]);
+		}
+
+		[HttpGet]
+		[User_JwtVerifyFilter]
+		public IActionResult GetUser()
+		{
+			User user = userFromToken.GetUserById(HttpContext.Items["UserId"] as string);
+			return Ok(user);
 		}
 
 
@@ -93,8 +104,6 @@ namespace BlogApp.Controllers
 			userToUpdate.UserName = user.UserName;
 
 			userToUpdate.ModifiedAt= DateTime.Now;
-
-
 
 			if (user.Bio != null)
 			{

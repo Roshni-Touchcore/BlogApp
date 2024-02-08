@@ -4,6 +4,7 @@ using BlogApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240208085616_RelationShip")]
+    partial class RelationShip
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,6 +73,9 @@ namespace BlogApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("BlogCommentId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("BlogId")
                         .HasColumnType("uniqueidentifier");
 
@@ -92,6 +98,8 @@ namespace BlogApp.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("BlogCommentId");
+
+                    b.HasIndex("BlogCommentId1");
 
                     b.HasIndex("BlogId");
 
@@ -234,6 +242,10 @@ namespace BlogApp.Migrations
 
             modelBuilder.Entity("BlogApp.Models.Domain.BlogComment", b =>
                 {
+                    b.HasOne("BlogApp.Models.Domain.BlogComment", null)
+                        .WithMany("Likes")
+                        .HasForeignKey("BlogCommentId1");
+
                     b.HasOne("BlogApp.Models.Domain.Blog", "Blog")
                         .WithMany("Comments")
                         .HasForeignKey("BlogId");
@@ -254,7 +266,7 @@ namespace BlogApp.Migrations
                         .HasForeignKey("BlogId");
 
                     b.HasOne("BlogApp.Models.Domain.BlogComment", "Comment")
-                        .WithMany("Likes")
+                        .WithMany()
                         .HasForeignKey("CommentBlogCommentId");
 
                     b.HasOne("BlogApp.Models.Domain.User", "CreatedBy")

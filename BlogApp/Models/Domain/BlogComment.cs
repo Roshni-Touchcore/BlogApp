@@ -22,5 +22,7 @@ namespace BlogApp.Models.Domain
 		public Guid ModifiedBy { get; set; }
 		[DataType(DataType.DateTime)]
 		public DateTime ModifiedAt { get; set; }
+
+		public virtual ICollection<BlogCommentLike>? Likes { get; }
 	}
 }

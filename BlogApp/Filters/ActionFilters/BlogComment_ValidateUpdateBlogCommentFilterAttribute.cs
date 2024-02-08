@@ -11,7 +11,7 @@ namespace BlogApp.Filters.ActionFilters
 		{
 			base.OnActionExecuting(context);
 			var id = context.ActionArguments["id"] as string;
-			var blogComment = context.ActionArguments["blog"] as BlogComment;
+			var blogComment = context.ActionArguments["comment"] as BlogComment;
 
 			if (!string.IsNullOrEmpty(id) && blogComment != null)
 			{

@@ -41,9 +41,10 @@ namespace BlogApp.Models.Domain
         [DataType(DataType.DateTime)]
         public DateTime ModifiedAt { get; set; }
 
+		public virtual ICollection<BlogLike>? Likes { get; }
+		public virtual ICollection<BlogComment>? Comments { get; }
 
-
-    }
+	}
 
 
 

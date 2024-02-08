@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BlogApp.Controllers
 {
     [ApiController]
-	[Route("[controller]")]
+	[Route("blog")]
 
 
 	
@@ -21,7 +21,6 @@ namespace BlogApp.Controllers
 
 		private readonly ApplicationDbContext db;
 		private readonly UserService userFromToken;
-		//private readonly IWebHostEnvironment environment;
 		private readonly IFileService _fileService;
 		public BlogsController(ApplicationDbContext db, IFileService fs)
 		{
@@ -30,20 +29,20 @@ namespace BlogApp.Controllers
 			this._fileService = fs;
 		}
 
+
+
+
 		[HttpGet]
 		[Route("all")]
 		[User_JwtVerifyFilter]
 		public IActionResult GetAllBlogs()
 		{
-
-			
-			
 			return Ok(db.Blogs.ToList());
 		}
 
 
 
-		[HttpGet("[action]/{id}")]
+		[HttpGet("{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(Blog_ValidateBlogIdFilterAttribute))]
 		public IActionResult GetBlog(string id)
@@ -97,24 +96,10 @@ namespace BlogApp.Controllers
 		public IActionResult UpdateBlog(string id,[FromForm] Blog blog)
 		{
 
-			try
-			{
 
-				var token = HttpContext.Items["UserId"];
+			User user = userFromToken.GetUserById(HttpContext.Items["UserId"] as string);
 
-				if (token == null)
-				{
-					return Unauthorized();
-				}
-
-				User user = userFromToken.GetUserById(token as string);
-
-				if (user == null)
-				{
-					return Unauthorized();
-				}
-
-				var blogToUpdate = HttpContext.Items["blog"] as Blog;
+			var blogToUpdate = HttpContext.Items["blog"] as Blog;
 				blogToUpdate.Title= blog.Title;
 				blogToUpdate.Content = blog.Content;
 
@@ -140,16 +125,13 @@ namespace BlogApp.Controllers
 
 				return NoContent();
 
-			}
-			catch
-			{
-				return Unauthorized();
-			}
+			
+			
 
 		}
 
 
-		[HttpDelete("[action]/{id}")]
+		[HttpDelete("delete/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(Blog_ValidateBlogIdFilterAttribute))]
 		public IActionResult DeleteBlog(string id)
