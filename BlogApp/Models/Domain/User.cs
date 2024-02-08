@@ -1,13 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 
 namespace BlogApp.Models.Domain
 {
-    //[Index(nameof(UserName), IsUnique = true)]
-    //[Index(nameof(Email), IsUnique = true)]
+
     public class User
     {
 
@@ -21,10 +21,13 @@ namespace BlogApp.Models.Domain
         [EmailAddress(ErrorMessage = "Invalid email address")]
         public string Email { get; set; }
 
-        [DataType(DataType.Password)]
+        [NotMapped]
         public string? Password { get; set; }
 
-        [Required(ErrorMessage = "Full Name is required")]
+		public string? PasswordSalt { get; set; }
+		public string? PasswordHash { get; set; }
+
+		[Required(ErrorMessage = "Full Name is required")]
         [StringLength(50, ErrorMessage = "Name cannot be longer than 50 characters.")]
         public string FullName { get; set; }
 

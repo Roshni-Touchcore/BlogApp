@@ -16,7 +16,8 @@
         "launchUrl": "user",
         "applicationUrl": "http://localhost:5116",
         "environmentVariables": {
-            "ASPNETCORE_ENVIRONMENT": "Development"
+            "ASPNETCORE_ENVIRONMENT": "Development",
+            "PasswordHashExamplePepper": "QWSDFGNMZXCVBGHJ"
         }
     },
     "https": {

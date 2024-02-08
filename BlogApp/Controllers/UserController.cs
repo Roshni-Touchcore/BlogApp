@@ -4,21 +4,26 @@ using BlogApp.Data;
 using BlogApp.Filters.ActionFilters;
 using BlogApp.Filters.AuthFilters;
 using BlogApp.Models.Domain;
+using BlogApp.Repository.Services;
+using Castle.Core.Resource;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.Controllers
 {
     [ApiController]
-	[Route("api/[controller]")]
+	[Route("user")]
 	public class UserController: ControllerBase
 	{
 		private readonly ApplicationDbContext db;
-        public UserController(ApplicationDbContext db)
+		private readonly string _pepper;
+		private readonly int _iteration = 3;
+		public UserController(ApplicationDbContext db)
         {
             this.db=db;
+			_pepper = Environment.GetEnvironmentVariable("PasswordHashExamplePepper");
 
-        }
+		}
 
         [HttpGet]
 		[Route("all")]
@@ -30,7 +35,7 @@ namespace BlogApp.Controllers
 
 
 
-		[HttpGet("[action]/{id}")]
+		[HttpGet("/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(User_ValidateUserIdFilterAttribute))]
 		public IActionResult GetUserById(string id)
@@ -40,7 +45,7 @@ namespace BlogApp.Controllers
 		}
 
 
-		[HttpPost]
+		[HttpPost("create")]
 		[TypeFilter(typeof(User_ValidateCreateUserFilterAttribute))]
 		public IActionResult CreateUser([FromBody] User user)
 		{
@@ -63,6 +68,8 @@ namespace BlogApp.Controllers
 			user.UserId=user.CreatedBy=user.ModifiedBy=Guid.NewGuid();
 			user.CreatedAt = user.ModifiedAt = DateTime.Now;
 			user.IsActive=true;
+			user.PasswordSalt = PasswordHasher.GenerateSalt();
+			user.PasswordHash = PasswordHasher.ComputeHash(user.Password, user.PasswordSalt, _pepper, _iteration);
 
 			this.db.Users.Add(user);
 			this.db.SaveChanges();
@@ -74,7 +81,7 @@ namespace BlogApp.Controllers
 			   user);
 		}
 
-	    [HttpPut("[action]/{id}")]
+	    [HttpPut("update/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(User_ValidateUserIdFilterAttribute))]
 		[TypeFilter(typeof(User_ValidateCreateUserFilterAttribute))]
@@ -105,7 +112,7 @@ namespace BlogApp.Controllers
 		}
 
 
-		[HttpDelete("[action]/{id}")]
+		[HttpDelete("delete{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(User_ValidateUserIdFilterAttribute))]
 		public IActionResult DeleteUser(string id)
