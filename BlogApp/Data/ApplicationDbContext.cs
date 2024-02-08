@@ -14,6 +14,7 @@ namespace BlogApp.Data
 		public DbSet<BlogLike> BlogLikes { get; set; }
 		public DbSet<BlogComment> BlogComments { get; set; }
 		public DbSet<BlogCommentLike> BlogCommentLikes { get; set; }
+		public DbSet<UserConnection> UserConnections { get; set; }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
