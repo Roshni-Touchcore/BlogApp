@@ -4,6 +4,8 @@ using BlogApp.Data;
 using BlogApp.Filters.ActionFilters;
 using BlogApp.Filters.AuthFilters;
 using BlogApp.Models.Domain;
+using BlogApp.Models.DTO;
+using BlogApp.Repository.Abstract;
 using BlogApp.Repository.Implementation;
 using BlogApp.Repository.Services;
 using Castle.Core.Resource;
@@ -16,16 +18,12 @@ namespace BlogApp.Controllers
 	[Route("user")]
 	public class UserController: ControllerBase
 	{
-		private readonly ApplicationDbContext db;
-		private readonly string _pepper;
-		private readonly UserService userFromToken;
-		private readonly int _iteration = 3;
-		public UserController(ApplicationDbContext db)
-        {
-            this.db=db;
-			this.userFromToken = new UserService(db);
-			_pepper = Environment.GetEnvironmentVariable("PasswordHashExamplePepper");
+		
 
+		private readonly IUserService userService;
+		public UserController(IUserService us)
+        {
+			userService = us;
 		}
 
         [HttpGet]
@@ -33,7 +31,7 @@ namespace BlogApp.Controllers
 		[User_JwtVerifyFilter]
 		public IActionResult GetUsers()
 		{
-			return Ok(db.Users.ToList());
+			return Ok(userService.GetUsers());
 		}
 
 
@@ -43,80 +41,37 @@ namespace BlogApp.Controllers
 		[TypeFilter(typeof(User_ValidateUserIdFilterAttribute))]
 		public IActionResult GetUserById(string id)
 		{
-
-			return Ok(HttpContext.Items["user"]);
+			return Ok(userService.GetUserById(id));
 		}
 
 		[HttpGet]
 		[User_JwtVerifyFilter]
 		public IActionResult GetUser()
-		{
-			User user = userFromToken.GetUserById(HttpContext.Items["UserId"] as string);
-			return Ok(user);
+		{			
+			return Ok(userService.CurrentUser());
 		}
 
 
 		[HttpPost("create")]
 		[TypeFilter(typeof(User_ValidateCreateUserFilterAttribute))]
-		public IActionResult CreateUser([FromBody] User user)
+		public IActionResult CreateUser([FromBody] UserDetails user)
 		{
 
-
-			if (string.IsNullOrEmpty(user.Password))
-			{
-				return BadRequest("Password is required");
-
-
-			}
-			else if (user.Password.Length < 6)
-			{
-				return BadRequest("Password must be at least 6 characters long");
-			}
-
-
-
-
-			user.UserId=user.CreatedBy=user.ModifiedBy=Guid.NewGuid();
-			user.CreatedAt = user.ModifiedAt = DateTime.Now;
-			user.IsActive=true;
-			user.PasswordSalt = PasswordHasher.GenerateSalt();
-			user.PasswordHash = PasswordHasher.ComputeHash(user.Password, user.PasswordSalt, _pepper, _iteration);
-
-			this.db.Users.Add(user);
-			this.db.SaveChanges();
-
-
-
+			var newUser = userService.CreateUser(user);
 			return CreatedAtAction(nameof(GetUserById),
-			   new { id = user.UserId },
-			   user);
+			   new { id = newUser.UserId },
+			   newUser);
 		}
+
+
 
 	    [HttpPut("update/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(User_ValidateUserIdFilterAttribute))]
 		[TypeFilter(typeof(User_ValidateCreateUserFilterAttribute))]
-		public IActionResult UpdateUser(string id,User user)
+		public IActionResult UpdateUser(string id,UserDetails user)
 		{
-			var userToUpdate = HttpContext.Items["user"] as User;
-			userToUpdate.Email = user.Email;
-			userToUpdate.FullName = user.FullName;
-			userToUpdate.UserName = user.UserName;
-
-			userToUpdate.ModifiedAt= DateTime.Now;
-
-			if (user.Bio != null)
-			{
-				userToUpdate.Bio = user.Bio;
-			}
-			if (user.Location != null)
-			{
-				userToUpdate.Location = user.Location;
-			}
-
-
-			db.SaveChanges();
-
+			userService.UpdateUser(user);
 			return NoContent();
 		}
 
@@ -126,12 +81,7 @@ namespace BlogApp.Controllers
 		[TypeFilter(typeof(User_ValidateUserIdFilterAttribute))]
 		public IActionResult DeleteUser(string id)
 		{
-			var userToDelete = HttpContext.Items["user"] as User;
-
-			userToDelete.IsActive = false;
-			db.SaveChanges();
-
-			return Ok(userToDelete);
+			return Ok(userService.DeleteUser());
 		}
 
 	}

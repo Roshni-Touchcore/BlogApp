@@ -3,6 +3,8 @@ using BlogApp.Data;
 using BlogApp.Filters.ActionFilters;
 using BlogApp.Filters.AuthFilters;
 using BlogApp.Models.Domain;
+using BlogApp.Models.DTO;
+using BlogApp.Repository.Abstract;
 using BlogApp.Repository.Implementation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,12 +15,15 @@ namespace BlogApp.Controllers
 
 	public class BlogInteractionController : ControllerBase
 	{
-		private readonly ApplicationDbContext db;
-		private readonly UserService userFromToken;
-		public BlogInteractionController(ApplicationDbContext db)
+		
+		private readonly IUserService userService;
+		private readonly IBlogInteraction blogInteractionService;
+
+		public BlogInteractionController(IUserService us, IBlogInteraction bs)
         {
-			this.db = db;
-			this.userFromToken = new UserService(db);
+			
+			this.userService = us;
+			this.blogInteractionService = bs;
 		}
 
 
@@ -27,36 +32,8 @@ namespace BlogApp.Controllers
 		[TypeFilter(typeof(Blog_ValidateBlogIdFilterAttribute))]
 		public IActionResult LikeOrUnlike(string id)
 		{
-			var interactedBlog = HttpContext.Items["blog"] as Blog;
-			User user = userFromToken.GetUserById(HttpContext.Items["UserId"] as string);
-
 			
-			var likedOrNot = db.BlogLikes.FirstOrDefault(x => x.Blog.BlogId == interactedBlog.BlogId && x.CreatedBy.UserId == user.UserId);
-			if (likedOrNot == null)
-			{
-				likedOrNot = new BlogLike
-				{
-					BlogLikeId = Guid.NewGuid(),
-					Blog=interactedBlog,
-					CreatedBy = user,
-					ModifiedBy = user.UserId,
-					IsActive = true,
-					CreatedAt = DateTime.Now,
-					ModifiedAt = DateTime.Now
-				};
-
-				db.BlogLikes.Add(likedOrNot);
-			}
-			else
-			{
-				likedOrNot.IsActive = !likedOrNot.IsActive;
-				likedOrNot.ModifiedAt = DateTime.Now;
-				likedOrNot.ModifiedBy = user.UserId;
-
-				
-			}
-			db.SaveChanges();
-			return Ok(likedOrNot);
+			return Ok(blogInteractionService.LikeOrUnlike());
 
 		}
 
@@ -66,56 +43,38 @@ namespace BlogApp.Controllers
 		[HttpPost("comment/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(Blog_ValidateBlogIdFilterAttribute))]
-		public IActionResult AddBlogComment(string id,[FromBody]BlogComment comment)
+		public IActionResult AddBlogComment(string id,[FromBody]BlogCommentDetails comment)
 		{
-			var interactedBlog = HttpContext.Items["blog"] as Blog;
-			User user = userFromToken.GetUserById(HttpContext.Items["UserId"] as string);
-
-			if(comment.CommentDesc == null)
-			{
-				return BadRequest("Comment  is required.");
-			}
-			comment.BlogCommentId = Guid.NewGuid();
-			comment.Blog=interactedBlog;
-			comment.ModifiedBy = user.UserId;
-			comment.CreatedBy = user;
-			comment.IsActive = true;
-			comment.CreatedAt = comment.ModifiedAt = DateTime.Now;
-
-			db.BlogComments.Add(comment);
-
-			db.SaveChanges();
-			return Ok(comment);
+			var newComment = blogInteractionService.AddBlogComment(comment);
+			return Ok(newComment);
 		}
 
+
+		[HttpPost("reply/comments/{id}")]
+		[User_JwtVerifyFilter]
+		[TypeFilter(typeof(Blog_ValidateBlogIdFilterAttribute))]
+		public IActionResult GetReplyComments(string id)
+		{
+
+			return Ok(blogInteractionService.GetReplyComments(id));
+
+		}
 
 		[HttpPut("comment/update/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(BlogComment_ValidateBlogCommentIdFilterAttribute))]
-		[TypeFilter(typeof(BlogComment_ValidateUpdateBlogCommentFilterAttribute))]
-		public IActionResult UpdateBlogComment(string id, [FromBody] BlogComment comment)
+		public IActionResult UpdateBlogComment(string id, [FromBody] BlogCommentDetails comment)
 		{
-			var interactedBlog = HttpContext.Items["blog"] as Blog;
-			var commentToUpdate = HttpContext.Items["comment"] as BlogComment;
-			User user = userFromToken.GetUserById(HttpContext.Items["UserId"] as string);
-			if (commentToUpdate.CreatedBy.UserId == user.UserId)
+			try
 			{
+				blogInteractionService.UpdateBlogComment(comment);
+				return NoContent();
 
-				if (comment.CommentDesc == null)
-				{
-					return BadRequest("Comment  is required.");
-				}
-				commentToUpdate.CommentDesc = comment.CommentDesc;
-				commentToUpdate.Blog = interactedBlog;
-				commentToUpdate.ModifiedBy = user.UserId;
-				commentToUpdate.IsActive = true;
-				commentToUpdate.ModifiedAt = DateTime.Now;
-
-				db.SaveChanges();
-				return Ok(commentToUpdate);
+			}catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
 			}
-
-			return BadRequest();
+			
 		}
 
 
@@ -125,22 +84,21 @@ namespace BlogApp.Controllers
 		[TypeFilter(typeof(BlogComment_ValidateBlogCommentIdFilterAttribute))]
 		public IActionResult DeleteBlogComment(string id)
 		{
-			var commentToUpdate = HttpContext.Items["comment"] as BlogComment;
-			User user = userFromToken.GetUserById(HttpContext.Items["UserId"] as string);
-			if (commentToUpdate.CreatedBy.UserId ==user.UserId )
-			{
 
-				commentToUpdate.IsActive = false;
-				commentToUpdate.ModifiedAt = DateTime.Now;
-				commentToUpdate.ModifiedBy = user.UserId;
-				db.SaveChanges();
-				return Ok(commentToUpdate);
+			try
+			{
+				
+				return Ok(blogInteractionService.DeleteBlogComment());
+
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
 			}
 
-			return BadRequest();
-
-
 		}
+
+
 
 
 
@@ -151,38 +109,8 @@ namespace BlogApp.Controllers
 		[TypeFilter(typeof(BlogComment_ValidateBlogCommentIdFilterAttribute))]
 		public IActionResult BlogCommentLikeOrUnlike(string id)
 		{
-			var interactedBlog = HttpContext.Items["blog"] as Blog;
-			var interactedComment = HttpContext.Items["comment"] as BlogComment;
-			User user = userFromToken.GetUserById(HttpContext.Items["UserId"] as string);
-			
-
-			var likedOrNot = db.BlogCommentLikes.FirstOrDefault(x => x.Blog.BlogId == interactedBlog.BlogId && x.Comment.BlogCommentId== interactedComment.BlogCommentId && x.CreatedBy.UserId==user.UserId);
-			if (likedOrNot == null)
-			{
-				likedOrNot = new BlogCommentLike
-				{
-					BlogCommentLikeId = Guid.NewGuid(),
-					Blog = interactedBlog,
-					Comment=interactedComment,
-					CreatedBy = user,
-					ModifiedBy = user.UserId,
-					IsActive = true,
-					CreatedAt = DateTime.Now,
-					ModifiedAt = DateTime.Now
-				};
-
-				db.BlogCommentLikes.Add(likedOrNot);
-
-			}
-			else
-			{
-				likedOrNot.IsActive = !likedOrNot.IsActive;
-				likedOrNot.ModifiedAt = DateTime.Now;
-				likedOrNot.ModifiedBy = user.UserId;
-
-			}
-			db.SaveChanges();
-			return Ok(likedOrNot);
+		
+			return Ok(blogInteractionService.BlogCommentLikeOrUnlike());
 
 		}
 

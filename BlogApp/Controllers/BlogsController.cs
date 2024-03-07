@@ -4,6 +4,7 @@ using BlogApp.Filters;
 using BlogApp.Filters.ActionFilters;
 using BlogApp.Filters.AuthFilters;
 using BlogApp.Models.Domain;
+using BlogApp.Models.DTO;
 using BlogApp.Repository.Abstract;
 using BlogApp.Repository.Implementation;
 using Microsoft.AspNetCore.Mvc;
@@ -13,20 +14,16 @@ namespace BlogApp.Controllers
     [ApiController]
 	[Route("blog")]
 
-
 	
 	public class BlogsController: ControllerBase
 	{
 
 
-		private readonly ApplicationDbContext db;
-		private readonly UserService userFromToken;
-		private readonly IFileService _fileService;
-		public BlogsController(ApplicationDbContext db, IFileService fs)
+		private readonly IBlogService blogService;
+		public BlogsController( IBlogService bs )
 		{
-			this.db = db;
-			this.userFromToken = new UserService(db);
-			this._fileService = fs;
+		
+			this.blogService = bs;
 		}
 
 
@@ -37,7 +34,7 @@ namespace BlogApp.Controllers
 		[User_JwtVerifyFilter]
 		public IActionResult GetAllBlogs()
 		{
-			return Ok(db.Blogs.ToList());
+			return Ok(blogService.GetAllBlogs());
 		}
 
 
@@ -48,7 +45,7 @@ namespace BlogApp.Controllers
 		public IActionResult GetBlog(string id)
 		{
 
-			return Ok(HttpContext.Items["blog"]);
+			return Ok(blogService.GetBlog());
 		}
 
 
@@ -56,34 +53,18 @@ namespace BlogApp.Controllers
 		[HttpPost]
 		[Route("create")]
 		[User_JwtVerifyFilter]
-		public IActionResult CreateBlog([FromForm] Blog blog)
+		public IActionResult CreateBlog([FromForm] BlogDetails blog) 
 		{
-			   
 
-
-				if (blog.CoverPhotoFile == null || blog.CoverPhotoFile.Length == 0)
-				{
-					return BadRequest("Cover photo is required.");
-				}
-
-				var fileResult = _fileService.SaveImage(blog.CoverPhotoFile);
-
-				if (fileResult.Item1 == 1)
-				{
-					blog.CoverPhoto = fileResult.Item2; 
-				}
-
-			    User user = userFromToken.GetUserById(HttpContext.Items["UserId"] as string);
-				blog.CreatedBy = user;
-			    blog.ModifiedBy = user.UserId;
-				blog.IsActive = true;
-				blog.CreatedAt = blog.ModifiedAt = DateTime.Now;
-
-				db.Blogs.Add(blog);
-				db.SaveChanges();
-				return CreatedAtAction(nameof(GetBlog),
-						new { id = blog.BlogId },
-										blog);
+			try
+			{
+				Blog newBlog = blogService.CreateBlog(blog);
+				return CreatedAtAction(nameof(GetBlog), new { id = newBlog.BlogId }, newBlog);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message); 
+			}
 		}
 
 
@@ -91,43 +72,20 @@ namespace BlogApp.Controllers
 		[HttpPut("update/{id}")]
 		[User_JwtVerifyFilter]
 		[TypeFilter(typeof(Blog_ValidateBlogIdFilterAttribute))]
-		[TypeFilter(typeof(Blog_ValidateUpdateBlogFilterAttribute))]
-
-		public IActionResult UpdateBlog(string id,[FromForm] Blog blog)
+		public IActionResult UpdateBlog(string id,[FromForm] BlogDetails blog)
 		{
 
 
-			User user = userFromToken.GetUserById(HttpContext.Items["UserId"] as string);
-
-			var blogToUpdate = HttpContext.Items["blog"] as Blog;
-				blogToUpdate.Title= blog.Title;
-				blogToUpdate.Content = blog.Content;
-
-				if (blog.CoverPhotoFile!=null)
-				{
-
-					var fileResult = _fileService.SaveImage(blog.CoverPhotoFile);
-
-					if (fileResult.Item1 == 1)
-					{
-						blogToUpdate.CoverPhoto = fileResult.Item2;
-					}
-
-				}
-
-				blogToUpdate.ModifiedAt = DateTime.Now;
-				blog.ModifiedBy = user.UserId ;
-
-
-				db.SaveChanges();
-
-
-
+			try
+			{
+				blogService.UpdateBlog(blog);
 				return NoContent();
-
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 			
-			
-
 		}
 
 
@@ -136,12 +94,8 @@ namespace BlogApp.Controllers
 		[TypeFilter(typeof(Blog_ValidateBlogIdFilterAttribute))]
 		public IActionResult DeleteBlog(string id)
 		{
-			var blogToDelete = HttpContext.Items["blog"] as Blog;
-
-			blogToDelete.IsActive = false;
-			db.SaveChanges();
-
-			return Ok(blogToDelete);
+			
+			return Ok(blogService.DeleteBlog());
 		}
 
 

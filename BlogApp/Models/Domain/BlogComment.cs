@@ -19,6 +19,8 @@ namespace BlogApp.Models.Domain
 		[DataType(DataType.DateTime)]
 		public DateTime CreatedAt { get; set; }
 
+
+		public Guid? Parent_commentID { get; set; }
 		public Guid ModifiedBy { get; set; }
 		[DataType(DataType.DateTime)]
 		public DateTime ModifiedAt { get; set; }

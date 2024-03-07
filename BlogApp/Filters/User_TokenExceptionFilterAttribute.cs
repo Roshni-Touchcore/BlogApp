@@ -10,12 +10,12 @@ namespace BlogApp.Filters
 	public class User_TokenExceptionFilterAttribute: ExceptionFilterAttribute
 	{
 
-		private readonly UserService userFromToken;
+		private readonly IUserService userService;
 		private readonly ApplicationDbContext db;
-		public User_TokenExceptionFilterAttribute(ApplicationDbContext db)
+		public User_TokenExceptionFilterAttribute(ApplicationDbContext db, IUserService us)
 		{
 			this.db = db;
-			this.userFromToken = new UserService(db);
+			userService = us;
 
 		}
 		public override void OnException(ExceptionContext context)
@@ -34,7 +34,7 @@ namespace BlogApp.Filters
 				context.Result = new UnauthorizedObjectResult(problemDetails);
 			}
 
-			User user = userFromToken.GetUserById(token as string);
+			User user = userService.GetUserById(token as string);
 
 			if (user == null)
 			{

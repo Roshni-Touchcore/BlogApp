@@ -10,10 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
 	options.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("BlogApp"));
 });
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IBlogService, BlogService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserConnection, UserConnectionService>();
+builder.Services.AddScoped<IBlogInteraction, BlogInteractionService>();
 
 builder.Services.AddTransient<IFileService, FileService>();
 

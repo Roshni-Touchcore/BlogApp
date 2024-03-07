@@ -1,5 +1,6 @@
 ﻿using BlogApp.Data;
 using BlogApp.Models.Domain;
+using BlogApp.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -18,7 +19,7 @@ namespace BlogApp.Filters.ActionFilters
 		{
 
 			base.OnActionExecuting(context);
-			var user = context.ActionArguments["user"] as User;
+			var user = context.ActionArguments["user"] as UserDetails;
 
 			if (user == null)
 			{
